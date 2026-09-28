@@ -20,6 +20,7 @@ class Handler(BaseHTTPRequestHandler):
         if not path.startswith("/files/"): return self.send_json(404,{"error":"route not found"})
         try:
             length=int(self.headers.get("Content-Length","0"))
+            if length<0: raise ValueError("Content-Length must not be negative")
             if length>STORAGE.max_bytes: raise ValueError("file is too large")
             result=STORAGE.save(path[7:],self.rfile.read(length)); self.send_json(201,result)
         except (ValueError,FileExistsError) as exc: self.send_json(400,{"error":str(exc)})
